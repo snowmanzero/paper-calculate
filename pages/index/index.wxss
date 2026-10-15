@@ -41,7 +41,7 @@ page {
 
 .divider { height: 1rpx; background: #e5e7eb; margin: 24rpx 0; }
 
-/* ========== 克重标签 ========== */
+/* 数字芯片 */
 .chips { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 14rpx; }
 .chip {
   padding: 10rpx 22rpx;
@@ -53,16 +53,20 @@ page {
   line-height: 1.2;
 }
 .chip.on { background: #2563eb; border-color: #2563eb; color: #fff; }
+/* + 添加按钮单独一行 */
+.chips-add { margin-top: 14rpx; }
 .chip.add {
-  font-weight: 800;
-  padding: 10rpx 26rpx;
+  display: inline-block;
+  font-size: 24rpx;
+  font-weight: 600;
+  padding: 10rpx 22rpx;
   border-style: dashed;
   color: #2563eb;
   border-color: #bfdbfe;
   background: #f0f7ff;
 }
 .chip-input {
-  width: 160rpx;
+  width: 200rpx;
   height: 52rpx;
   line-height: 52rpx;
   padding: 0 22rpx;

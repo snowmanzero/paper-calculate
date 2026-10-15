@@ -96,6 +96,7 @@ Page({
         if (clean.length) gsmList = clean;
       }
     } catch (e) {}
+    gsmList.sort((a, b) => a - b);
 
     // 恢复规格选中状态
     let selectedMap = {};
@@ -164,6 +165,7 @@ Page({
       const g = Math.round(val * 100) / 100;
       if (gsmList.indexOf(g) === -1) {
         gsmList.push(g);
+        gsmList.sort((a, b) => a - b);
         try { wx.setStorageSync(STORAGE_GSM_KEY, gsmList); } catch (e) {}
       }
       newGsm = String(g);

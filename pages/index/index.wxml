@@ -10,10 +10,12 @@
         <view wx:for="{{gsmList}}" wx:key="*this"
               class="chip {{gsm === '' + item ? 'on' : ''}}"
               data-g="{{item}}" bindtap="onChipTap" bindlongpress="onChipLongPress">{{item}}g</view>
+      </view>
+      <view class="chips-add">
         <input wx:if="{{addingGsm}}" class="chip-input" type="digit" value="{{newGsmValue}}"
-               placeholder="克重" placeholder-class="ph" focus="{{addingGsm}}"
-               bindinput="onNewGsmInput" bindblur="onNewGsmBlur" bindconfirm="onNewGsmConfirm" />
-        <view wx:else class="chip add" bindtap="onAddGsmTap">+</view>
+              placeholder="克重" placeholder-class="ph" focus="{{addingGsm}}"
+              bindinput="onNewGsmInput" bindblur="onNewGsmBlur" bindconfirm="onNewGsmConfirm" />
+        <view wx:else class="chip add" bindtap="onAddGsmTap">+ 添加克重</view>
       </view>
     </view>
 
