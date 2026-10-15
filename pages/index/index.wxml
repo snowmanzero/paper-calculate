@@ -1,0 +1,195 @@
+<view class="wrap">
+  <view class="title">纸张价格计算器</view>
+
+  <!-- 输入卡片 -->
+  <view class="card">
+    <view class="field">
+      <view class="label">克重（g/m²）</view>
+      <input class="main-input" type="digit" value="{{gsm}}" bindinput="onGsmInput" placeholder="如 80" placeholder-class="ph" />
+      <view class="chips">
+        <view wx:for="{{gsmList}}" wx:key="*this"
+              class="chip {{gsm === '' + item ? 'on' : ''}}"
+              data-g="{{item}}" bindtap="onChipTap" bindlongpress="onChipLongPress">{{item}}g</view>
+        <input wx:if="{{addingGsm}}" class="chip-input" type="digit" value="{{newGsmValue}}"
+               placeholder="克重" placeholder-class="ph" focus="{{addingGsm}}"
+               bindinput="onNewGsmInput" bindblur="onNewGsmBlur" bindconfirm="onNewGsmConfirm" />
+        <view wx:else class="chip add" bindtap="onAddGsmTap">+</view>
+      </view>
+    </view>
+
+    <view class="divider"></view>
+
+    <view class="field">
+      <view class="label">纸张吨价（元/吨）</view>
+      <input class="main-input" type="digit" value="{{price}}" bindinput="onPriceInput" placeholder="如 6800" placeholder-class="ph" />
+    </view>
+
+    <view class="field">
+      <view class="label">令价（元/令）<text class="opt">按大度系数换算</text></view>
+      <input class="main-input" type="digit" value="{{reamPrice}}" bindinput="onReamInput" placeholder="如 288.72" placeholder-class="ph" />
+    </view>
+
+    <view class="divider"></view>
+
+    <view class="section-title">自定义尺寸（选填）</view>
+    <view class="field-row">
+      <view class="field">
+        <view class="label">长（mm）</view>
+        <input class="main-input" type="digit" value="{{cw}}" bindinput="onCwInput" placeholder="如 889" placeholder-class="ph" />
+      </view>
+      <view class="field">
+        <view class="label">宽（mm）</view>
+        <input class="main-input" type="digit" value="{{ch}}" bindinput="onChInput" placeholder="如 1194" placeholder-class="ph" />
+      </view>
+    </view>
+  </view>
+
+  <!-- 大度 / 正度结果 -->
+  <view class="result-grid">
+    <view class="card result-card">
+      <view class="rc-title">大度</view>
+      <view class="rc-dim">889 × 1194</view>
+      <view class="rc-row"><text class="rc-label">令价</text><text class="rc-val blue">{{resultDada.ream}}</text></view>
+      <view class="rc-row"><text class="rc-label">张价</text><text class="rc-val dark">{{resultDada.sheet}}</text></view>
+    </view>
+    <view class="card result-card">
+      <view class="rc-title">正度</view>
+      <view class="rc-dim">787 × 1092</view>
+      <view class="rc-row"><text class="rc-label">令价</text><text class="rc-val blue">{{resultZheng.ream}}</text></view>
+      <view class="rc-row"><text class="rc-label">张价</text><text class="rc-val dark">{{resultZheng.sheet}}</text></view>
+    </view>
+  </view>
+
+  <view class="card result-card full" wx:if="{{showResultCustom}}">
+    <view class="res-head">
+      <view class="rc-title">自定义</view>
+      <view class="rc-dim">{{resultCustom.dim}}</view>
+    </view>
+    <view class="rc-row"><text class="rc-label">令价</text><text class="rc-val blue">{{resultCustom.ream}} 元/令</text></view>
+    <view class="rc-row"><text class="rc-label">张价</text><text class="rc-val dark">{{resultCustom.sheet}} 元/张</text></view>
+  </view>
+
+  <!-- 分切结果 -->
+  <view class="card cut-card">
+    <view class="cut-header">
+      <view class="cut-title">分切结果</view>
+      <view class="add-spec-btn" bindtap="onOpenAddDialog">选择规格</view>
+    </view>
+
+    <!-- A / B / K 系列：没有选中规格时整块不显示 -->
+    <block wx:for="{{cutGroups}}" wx:for-item="group" wx:key="gi">
+      <view wx:if="{{group.items.length > 0}}" class="cut-section">
+        <view class="series-name">{{group.label}}</view>
+
+        <view class="qty-row">
+          <view wx:for="{{group.quickQtyBtns}}" wx:for-item="qb" wx:key="qty"
+                class="qty-btn {{qb.on ? 'on' : ''}}"
+                data-gi="{{group.gi}}" data-qty="{{qb.qty}}"
+                bindtap="onQtyBtnTap">{{qb.qty}}张</view>
+          <view wx:for="{{group.customQtyBtns}}" wx:for-item="qb" wx:key="qty"
+                class="qty-btn on" data-gi="{{group.gi}}" data-qty="{{qb.qty}}"
+                bindtap="onQtyBtnTap">{{qb.qty}}张</view>
+          <input wx:if="{{group.showQtyInput}}"
+                 class="qty-input" type="number" value="{{group.qtyInput}}"
+                 placeholder="张数" placeholder-class="ph" focus="{{group.showQtyInput}}"
+                 data-gi="{{group.gi}}"
+                 bindinput="onQtyInput" bindblur="onQtyInputBlur" bindconfirm="onQtyInputConfirm" />
+          <view wx:else class="qty-add-btn" data-gi="{{group.gi}}" bindtap="onQtyAddTap">+</view>
+        </view>
+
+        <view class="cut-items">
+          <view wx:for="{{group.items}}" wx:for-item="it" wx:key="_id" class="cut-item">
+            <view class="cut-item-head">
+              <text class="ci-name">{{it.name}}</text>
+              <text class="ci-fold">{{it.fold}}</text>
+              <text class="ci-dim">{{it.dim}}</text>
+            </view>
+            <view class="ci-row"><text>单张</text><text class="ci-val">{{it.unit}}</text></view>
+            <view class="ci-row"><text>10 张</text><text class="ci-val">{{it.ten}}</text></view>
+            <view wx:for="{{it.qtyRows}}" wx:for-item="qr" wx:key="qty" class="ci-row custom">
+              <text>{{qr.qty}} 张</text><text class="ci-val">{{qr.cost}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <!-- 自定义尺寸卡片 -->
+    <view wx:if="{{manualCards.length > 0}}" class="cut-section">
+      <view class="series-name">自定义尺寸</view>
+      <view class="qty-row">
+        <view wx:for="{{manualQuickQtyBtns}}" wx:for-item="qb" wx:key="qty"
+              class="qty-btn {{qb.on ? 'on' : ''}}"
+              data-qty="{{qb.qty}}" bindtap="onManualQtyBtnTap">{{qb.qty}}张</view>
+        <view wx:for="{{manualCustomQtyBtns}}" wx:for-item="qb" wx:key="qty"
+              class="qty-btn on" data-qty="{{qb.qty}}" bindtap="onManualQtyBtnTap">{{qb.qty}}张</view>
+        <input wx:if="{{manualShowQtyInput}}"
+               class="qty-input" type="number" value="{{manualQtyInput}}"
+               placeholder="张数" placeholder-class="ph" focus="{{manualShowQtyInput}}"
+               bindinput="onManualQtyInput" bindblur="onManualQtyInputBlur" bindconfirm="onManualQtyInputConfirm" />
+        <view wx:else class="qty-add-btn" bindtap="onManualQtyAddTap">+</view>
+      </view>
+      <view class="cut-items">
+        <view wx:for="{{manualCards}}" wx:for-item="cc" wx:key="id" class="cut-item">
+          <view class="cut-item-head">
+            <text class="ci-name">{{cc.w}} × {{cc.h}}</text>
+            <text class="ci-fold {{cc.manualFold ? 'manual' : ''}}">{{cc.fold}}</text>
+            <text class="ci-dim">{{cc.paperName}}</text>
+            <text class="ci-remove" data-id="{{cc.id}}" bindtap="onRemoveManualCard">×</text>
+          </view>
+          <view class="ci-row"><text>单张</text><text class="ci-val">{{cc.unit}}</text></view>
+          <view class="ci-row"><text>10 张</text><text class="ci-val">{{cc.ten}}</text></view>
+          <view wx:for="{{cc.qtyRows}}" wx:for-item="qr" wx:key="qty" class="ci-row custom">
+            <text>{{qr.qty}} 张</text><text class="ci-val">{{qr.cost}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 没有任何结果时的空提示 -->
+    <view wx:if="{{hasAnyResult === false}}" class="empty-tip">暂无规格，点右上角「选择规格」添加</view>
+  </view>
+
+  <view class="hint">
+    <view class="hint-line">· 令价 = 吨价 × 克重 ÷ 系数，张价 = 令价 ÷ 500</view>
+    <view class="hint-line">· 大度系数 1884、正度系数 2327</view>
+    <view class="hint-line">· 吨价与令价只填一个即可</view>
+    <view class="hint-line">· 长按克重标签可删除</view>
+  </view>
+
+  <!-- 规格选择弹窗 -->
+  <view wx:if="{{showAddDialog}}" class="dialog-mask" bindtap="onCloseAddDialog">
+    <view class="dialog" catchtap="onDialogStop">
+      <view class="dialog-title">选择规格</view>
+
+      <block wx:for="{{cutGroups}}" wx:for-item="grp" wx:key="gi">
+        <view class="dialog-section">{{grp.label}}</view>
+        <view class="spec-chips">
+          <view wx:for="{{grp.specs}}" wx:for-item="sp" wx:key="name"
+                class="spec-chip {{sp.selected ? 'on' : ''}}"
+                data-gi="{{grp.gi}}" data-name="{{sp.name}}"
+                bindtap="onSpecToggle">{{sp.name}}</view>
+        </view>
+      </block>
+
+      <view class="dialog-divider"></view>
+
+      <view class="dialog-section">手动输入尺寸</view>
+      <view class="dialog-row">
+        <input class="dialog-input" type="digit" value="{{dialogW}}" bindinput="onDialogWInput" placeholder="长（mm）" placeholder-class="ph" />
+        <input class="dialog-input" type="digit" value="{{dialogH}}" bindinput="onDialogHInput" placeholder="宽（mm）" placeholder-class="ph" />
+      </view>
+      <view class="dialog-row">
+        <input class="dialog-input" type="number" value="{{dialogFold}}" bindinput="onDialogFoldInput" placeholder="开数（选填）" placeholder-class="ph" />
+      </view>
+      <view class="dialog-row">
+        <view class="paper-toggle">
+          <view class="paper-btn {{dialogPaper === 'dada' ? 'on' : ''}}" data-paper="dada" bindtap="onDialogPaperTap">大度</view>
+          <view class="paper-btn {{dialogPaper === 'zheng' ? 'on' : ''}}" data-paper="zheng" bindtap="onDialogPaperTap">正度</view>
+        </view>
+      </view>
+      <view class="dialog-add-btn" bindtap="onDialogAddManual">添加自定义尺寸</view>
+      <view class="dialog-done" bindtap="onCloseAddDialog">完成</view>
+    </view>
+  </view>
+</view>

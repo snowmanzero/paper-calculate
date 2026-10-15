@@ -1,0 +1,12 @@
+{
+  "pages": ["pages/index/index"],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#f8fafc",
+    "navigationBarTitleText": "纸张价格计算器",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#eef2f7"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}
